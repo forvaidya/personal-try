@@ -7,7 +7,7 @@ pull following values remote state.
 
 project name: boston 
 Environmemnt - dev 
-region: eu-central-1 
+region: ap-south-1 
 
 
 Resources:
