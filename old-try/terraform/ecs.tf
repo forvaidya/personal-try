@@ -120,13 +120,14 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   role       = aws_iam_role.ecs_task_execution.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
+
 # ECS Task Definition
 resource "aws_ecs_task_definition" "app" {
   family                   = "denzopa-app"
   network_mode             = "awsvpc"
   requires_compatibilities = ["EC2"]
-  cpu                      = 320
-  memory                   = 640
+  cpu                      = 256
+  memory                   = 512
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   container_definitions = jsonencode([
     {
@@ -158,26 +159,6 @@ resource "aws_ecs_task_definition" "app" {
         retries     = 3
         startPeriod = 60
         timeout     = 5
-      }
-    },
-    {
-      name      = "wakeup"
-      image     = "curlimages/curl:latest"
-      cpu       = 128
-      memory    = 128
-      essential = false
-
-      command = [
-        "sh", "-c", "while true; do curl -s nuxt-app-container:3000 | tee /dev/stderr > /dev/null; sleep 300; done"
-      ]
-
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          awslogs-group         = aws_cloudwatch_log_group.ecs.name
-          awslogs-region        = "ap-south-1"
-          awslogs-stream-prefix = "ecs"
-        }
       }
     }
   ])
