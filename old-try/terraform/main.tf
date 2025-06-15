@@ -1,7 +1,6 @@
-
 # VPC
 resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/22"
+  cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
 
@@ -51,7 +50,7 @@ resource "aws_nat_gateway" "main" {
 # Public Subnets
 resource "aws_subnet" "public_1" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.0.0/25"
+  cidr_block              = "10.0.1.0/24"
   availability_zone       = "ap-south-1a"
   map_public_ip_on_launch = true
 
@@ -64,7 +63,7 @@ resource "aws_subnet" "public_1" {
 
 resource "aws_subnet" "public_2" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.0.128/25"
+  cidr_block              = "10.0.2.0/24"
   availability_zone       = "ap-south-1b"
   map_public_ip_on_launch = true
 
@@ -77,7 +76,7 @@ resource "aws_subnet" "public_2" {
 
 resource "aws_subnet" "public_3" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/25"
+  cidr_block              = "10.0.3.0/24"
   availability_zone       = "ap-south-1c"
   map_public_ip_on_launch = true
 
@@ -91,7 +90,7 @@ resource "aws_subnet" "public_3" {
 # Private Subnets
 resource "aws_subnet" "private_1" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.128/25"
+  cidr_block        = "10.0.11.0/24"
   availability_zone = "ap-south-1a"
 
   tags = {
@@ -103,7 +102,7 @@ resource "aws_subnet" "private_1" {
 
 resource "aws_subnet" "private_2" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.0/25"
+  cidr_block        = "10.0.12.0/24"
   availability_zone = "ap-south-1b"
 
   tags = {
@@ -115,7 +114,7 @@ resource "aws_subnet" "private_2" {
 
 resource "aws_subnet" "private_3" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.2.128/25"
+  cidr_block        = "10.0.13.0/24"
   availability_zone = "ap-south-1c"
 
   tags = {
@@ -185,72 +184,4 @@ resource "aws_route_table_association" "private_2" {
 resource "aws_route_table_association" "private_3" {
   subnet_id      = aws_subnet.private_3.id
   route_table_id = aws_route_table.private.id
-}
-
-# VPC Flow Logs
-resource "aws_flow_log" "vpc" {
-  iam_role_arn    = aws_iam_role.vpc_flow_logs.arn
-  log_destination = aws_cloudwatch_log_group.vpc_flow_logs.arn
-  traffic_type    = "ALL"
-  vpc_id          = aws_vpc.main.id
-}
-
-resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
-  name              = "/aws/vpc-flow-logs/denzopa"
-  retention_in_days = 30
-
-  tags = {
-    Name        = "denzopa-vpc-flow-logs"
-    project     = "denzopa"
-    environment = "denzopa-dev"
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "aws logs delete-log-group --log-group-name /aws/vpc-flow-logs/denzopa"
-  }
-}
-
-resource "aws_iam_role" "vpc_flow_logs" {
-  name = "denzopa-vpc-flow-logs-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "vpc-flow-logs.amazonaws.com"
-        }
-      }
-    ]
-  })
-
-  tags = {
-    project     = "denzopa"
-    environment = "denzopa-dev"
-  }
-}
-
-resource "aws_iam_role_policy" "vpc_flow_logs" {
-  name = "denzopa-vpc-flow-logs-policy"
-  role = aws_iam_role.vpc_flow_logs.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DescribeLogGroups",
-          "logs:DescribeLogStreams"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      }
-    ]
-  })
 } 
