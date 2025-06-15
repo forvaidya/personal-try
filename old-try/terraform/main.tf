@@ -63,6 +63,128 @@ resource "aws_vpc_endpoint" "ec2messages" {
   }
 }
 
+# ECR API endpoint
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-south-1.ecr.api"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.private_1.id, aws_subnet.private_2.id, aws_subnet.private_3.id]
+
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "denzopa-ecr-api-endpoint"
+    project     = "denzopa"
+    environment = "denzopa-dev"
+  }
+}
+
+# ECR DKR endpoint
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-south-1.ecr.dkr"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.private_1.id, aws_subnet.private_2.id, aws_subnet.private_3.id]
+
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "denzopa-ecr-dkr-endpoint"
+    project     = "denzopa"
+    environment = "denzopa-dev"
+  }
+}
+
+# CloudWatch Logs endpoint
+resource "aws_vpc_endpoint" "logs" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-south-1.logs"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.private_1.id, aws_subnet.private_2.id, aws_subnet.private_3.id]
+
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "denzopa-logs-endpoint"
+    project     = "denzopa"
+    environment = "denzopa-dev"
+  }
+}
+
+# S3 Gateway endpoint
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.ap-south-1.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids = [aws_route_table.private.id]
+
+  tags = {
+    Name        = "denzopa-s3-endpoint"
+    project     = "denzopa"
+    environment = "denzopa-dev"
+  }
+}
+
+# CloudWatch Metrics endpoint
+resource "aws_vpc_endpoint" "monitoring" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-south-1.monitoring"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.private_1.id, aws_subnet.private_2.id, aws_subnet.private_3.id]
+
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "denzopa-monitoring-endpoint"
+    project     = "denzopa"
+    environment = "denzopa-dev"
+  }
+}
+
+# Secrets Manager endpoint
+resource "aws_vpc_endpoint" "secretsmanager" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-south-1.secretsmanager"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.private_1.id, aws_subnet.private_2.id, aws_subnet.private_3.id]
+
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "denzopa-secretsmanager-endpoint"
+    project     = "denzopa"
+    environment = "denzopa-dev"
+  }
+}
+
+# KMS endpoint
+resource "aws_vpc_endpoint" "kms" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.ap-south-1.kms"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.private_1.id, aws_subnet.private_2.id, aws_subnet.private_3.id]
+
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "denzopa-kms-endpoint"
+    project     = "denzopa"
+    environment = "denzopa-dev"
+  }
+}
+
 # Security group for VPC endpoints
 resource "aws_security_group" "vpc_endpoints" {
   name        = "denzopa-vpc-endpoints-sg"
