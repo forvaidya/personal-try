@@ -1,71 +1,76 @@
----
-    name: Terraform Plan and Apply
-    
-    on:
-      workflow_dispatch:
-      
-    
-    jobs:
-      terraform-plan:
-        runs-on: ubuntu-latest
-    
-        permissions:
-          id-token: write
-          contents: read
-    
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v2
-            
-          - name: Authenticate to AWS
-            id: aws-auth
-            uses: aws-actions/configure-aws-credentials@v2
-            with:
-              role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-              aws-region: ${{ secrets.AWS_REGION }}
+name: Terraform Plan and Apply
 
-          - name: who_am_i
-            run: aws sts get-caller-identity
-            
-          - name: Setup Terraform
-            uses: hashicorp/setup-terraform@v2
-            with:
-              terraform_version: 1.5.0
+on:
+  workflow_dispatch:
 
-          - name: Terraform Init
-            run: terraform -chdir=old-try/terraform init 
-  
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
-          - name: Terraform Plan
-            run: terraform -chdir=old-try/terraform plan
-            env:
-              TF_VAR_region: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Authenticate to AWS
+        id: aws-auth
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      terraform-apply:
-        needs: terraform-plan
-        runs-on: ubuntu-latest
-        environment: production
-        permissions:
-          id-token: write
-          contents: read
+      - name: who_am_i
+        run: aws sts get-caller-identity
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
 
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v2
-            
-          - name: Authenticate to AWS
-            id: aws-auth
-            uses: aws-actions/configure-aws-credentials@v2
-            with:
-              role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-              aws-region: ${{ secrets.AWS_REGION }}
+      - name: Terraform Init
+        run: terraform -chdir=old-try/terraform init 
 
-          - name: who_am_i
-            run: aws sts get-caller-identity
-            
-          - name: Setup Terraform
-            uses: hashicorp/setup-terraform@v2
-            with:
-              terraform_version: 1.5.0
+      - name: Terraform Plan
+        run: terraform -chdir=old-try/terraform plan
+        env:
+          TF_VAR_region: ${{ secrets.AWS_REGION }}
 
-          - name: Terraform Init
+  terraform-apply:
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+      url: ${{ steps.deployment.outputs.url }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Authenticate to AWS
+        id: aws-auth
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: who_am_i
+        run: aws sts get-caller-identity
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+
+      - name: Terraform Init
+        run: terraform -chdir=old-try/terraform init 
+
+      - name: Terraform Apply
+        id: deployment
+        run: terraform -chdir=old-try/terraform apply -auto-approve
+        env:
+          TF_VAR_region: ${{ secrets.AWS_REGION }}
