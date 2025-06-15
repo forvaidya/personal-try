@@ -252,6 +252,7 @@ resource "aws_ecs_service" "app" {
 */
 
 # ECS Service Autoscaling
+/*
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = 12
   min_capacity       = 0
@@ -278,6 +279,7 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
     scale_out_cooldown = 300
   }
 }
+*/
 
 # CloudWatch Log Group for ECS
 resource "aws_cloudwatch_log_group" "ecs" {
