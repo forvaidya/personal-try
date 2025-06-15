@@ -23,24 +23,4 @@ resource "aws_security_group" "vpc_endpoints" {
     project     = "denzopa"
     environment = "denzopa-dev"
   }
-}
-
-# VPC Endpoint Policy
-resource "aws_vpc_endpoint_policy" "ec2_instance_connect" {
-  vpc_endpoint_id = aws_vpc_endpoint.ec2_instance_connect.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = "*"
-        Action = [
-          "ec2-instance-connect:SendSSHPublicKey",
-          "ec2-instance-connect:OpenTunnel"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
 } 
