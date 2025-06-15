@@ -166,6 +166,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
 }
 
 # ECS Task Definition
+/*
 resource "aws_ecs_task_definition" "app" {
   family                   = "denzopa-app"
   network_mode             = "awsvpc"
@@ -248,6 +249,7 @@ resource "aws_ecs_service" "app" {
     environment = "denzopa-dev"
   }
 }
+*/
 
 # ECS Service Autoscaling
 resource "aws_appautoscaling_target" "ecs_target" {
