@@ -78,19 +78,17 @@ resource "aws_security_group" "alb" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = []
-    prefix_list_ids = ["com.amazonaws.global.cloudfront.origin-facing"]
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    prefix_list_ids = ["pl-58a04531"]  # CloudFront prefix list for ap-south-1
   }
 
   ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = []
-    prefix_list_ids = ["com.amazonaws.global.cloudfront.origin-facing"]
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    prefix_list_ids = ["pl-58a04531"]  # CloudFront prefix list for ap-south-1
   }
 
   egress {
