@@ -32,10 +32,10 @@
               terraform_version: 1.5.0
 
           - name: Terraform Init
-            run: terraform -chdir=old_try/terraform init 
+            run: terraform -chdir=old-try/terraform init 
 
           - name: Terraform Destroy
-            run: terraform -chdir=old_try/terraform destroy -auto-approve
+            run: terraform -chdir=old-try/terraform destroy -auto-approve
           
             env:
               TF_VAR_region: ${{ secrets.AWS_REGION }}

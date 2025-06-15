@@ -1,12 +1,12 @@
 ---
-    name: Terraform APPLY
+    name: Terraform Plan and Apply
     
     on:
       workflow_dispatch:
       
     
     jobs:
-      terraform-apply:
+      terraform-plan:
         runs-on: ubuntu-latest
     
         permissions:
@@ -33,10 +33,39 @@
               terraform_version: 1.5.0
 
           - name: Terraform Init
-            run: terraform -chdir=old_try/terraform init 
+            run: terraform -chdir=old-try/terraform init 
   
 
-          - name: Terraform Apply
-            run: terraform  -chdir=old_try/terraform apply -auto-approve
+          - name: Terraform Plan
+            run: terraform -chdir=old-try/terraform plan
             env:
               TF_VAR_region: ${{ secrets.AWS_REGION }}
+
+      terraform-apply:
+        needs: terraform-plan
+        runs-on: ubuntu-latest
+        environment: production
+        permissions:
+          id-token: write
+          contents: read
+
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+            
+          - name: Authenticate to AWS
+            id: aws-auth
+            uses: aws-actions/configure-aws-credentials@v2
+            with:
+              role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+              aws-region: ${{ secrets.AWS_REGION }}
+
+          - name: who_am_i
+            run: aws sts get-caller-identity
+            
+          - name: Setup Terraform
+            uses: hashicorp/setup-terraform@v2
+            with:
+              terraform_version: 1.5.0
+
+          - name: Terraform Init
