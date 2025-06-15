@@ -22,8 +22,3 @@ output "ec2_instance_connect_endpoint_id" {
   description = "The ID of the EC2 Instance Connect Endpoint"
   value       = aws_ec2_instance_connect_endpoint.main.id
 }
-
-output "ecr_repository_url" {
-  description = "The URL of the ECR repository"
-  value       = aws_ecr_repository.app.repository_url
-}
