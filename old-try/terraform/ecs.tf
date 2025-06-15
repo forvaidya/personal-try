@@ -306,13 +306,6 @@ resource "aws_security_group" "ecs" {
     security_groups = [aws_security_group.alb.id]
   }
 
-  ingress {
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
-    security_groups = [aws_security_group.instance_connect.id]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -364,16 +357,6 @@ resource "aws_iam_role_policy_attachment" "ssm" {
 resource "aws_iam_role_policy_attachment" "cloudwatch" {
   role       = aws_iam_role.ecs.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "ssm_directory" {
-  role       = aws_iam_role.ecs.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMDirectoryServiceAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "ec2_instance_connect" {
-  role       = aws_iam_role.ecs.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2InstanceConnect"
 }
 
 resource "aws_iam_instance_profile" "ecs" {
