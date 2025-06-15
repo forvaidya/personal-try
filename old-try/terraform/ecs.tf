@@ -304,8 +304,28 @@ resource "aws_iam_role_policy_attachment" "ecs" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
+# Add EC2 Instance Connect permissions
+resource "aws_iam_role_policy" "ec2_instance_connect" {
+  name = "denzopa-ec2-instance-connect-policy"
+  role = aws_iam_role.ecs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2-instance-connect:SendSSHPublicKey",
+          "ec2-instance-connect:OpenTunnel"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_instance_profile" "ecs" {
-  name = "denzopa-ecs-instance-profile"
+  name = "denzopa-ecs-profile"
   role = aws_iam_role.ecs.name
 }
 

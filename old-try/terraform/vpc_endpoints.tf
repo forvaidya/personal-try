@@ -1,19 +1,3 @@
-# VPC Endpoints for EC2 Instance Connect
-resource "aws_vpc_endpoint" "ec2_instance_connect" {
-  vpc_id              = aws_vpc.main.id
-  service_name        = "com.amazonaws.ap-south-1.ec2-instance-connect"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.private_1.id, aws_subnet.private_2.id, aws_subnet.private_3.id]
-  security_group_ids  = [aws_security_group.vpc_endpoints.id]
-  private_dns_enabled = true
-
-  tags = {
-    Name        = "denzopa-ec2-instance-connect-endpoint"
-    project     = "denzopa"
-    environment = "denzopa-dev"
-  }
-}
-
 # Security Group for VPC Endpoints
 resource "aws_security_group" "vpc_endpoints" {
   name        = "denzopa-vpc-endpoints-sg"
