@@ -1,8 +1,8 @@
 # EC2 Instance Connect Endpoint
 resource "aws_ec2_instance_connect_endpoint" "main" {
-  subnet_id = aws_subnet.private_1.id
-
+  subnet_id = aws_subnet.public_1.id
   preserve_client_ip = true
+  security_group_ids = [aws_security_group.instance_connect.id]
 
   tags = {
     Name        = "denzopa-ec2-instance-connect-endpoint"
