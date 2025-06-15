@@ -27,15 +27,59 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
   }
 }
 
+# Get latest Amazon Linux 2023 AMI
+data "aws_ami" "amazon_linux_2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 # Launch Template for ECS EC2 instances
 resource "aws_launch_template" "ecs" {
   name_prefix   = "denzopa-ecs-lt-"
-  image_id      = "ami-0298e0c0441cb5c66"
+  image_id      = data.aws_ami.amazon_linux_2023.id
   instance_type = "t3.medium"
 
   user_data = base64encode(<<-EOF
               #!/bin/bash
+              # Update system and install required packages
+              dnf update -y
+              dnf install -y amazon-cloudwatch-agent amazon-ssm-agent curl docker jq
+
+              # Install AWS CLI v2
+              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              dnf install -y unzip
+              unzip awscliv2.zip
+              ./aws/install
+
+              # Install Docker Compose
+              curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              chmod +x /usr/local/bin/docker-compose
+
+              # Start and enable services
+              systemctl enable --now docker
+              systemctl enable --now amazon-ssm-agent
+              systemctl enable --now amazon-cloudwatch-agent
+
+              # Add ec2-user to docker group
+              usermod -aG docker ec2-user
+
+              # Install and configure ECS agent
+              dnf install -y ecs-init
+              systemctl enable --now ecs
               echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
+
+              # Ensure SSH is enabled and running
+              systemctl enable --now sshd
               EOF
   )
 
@@ -306,29 +350,30 @@ resource "aws_iam_role" "ecs" {
   }
 }
 
+# Attach required policies to ECS role
 resource "aws_iam_role_policy_attachment" "ecs" {
   role       = aws_iam_role.ecs.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
-# Add EC2 Instance Connect permissions
-resource "aws_iam_role_policy" "ec2_instance_connect" {
-  name = "denzopa-ec2-instance-connect-policy"
-  role = aws_iam_role.ecs.id
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ecs.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ec2-instance-connect:SendSSHPublicKey",
-          "ec2-instance-connect:OpenTunnel"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
+resource "aws_iam_role_policy_attachment" "cloudwatch" {
+  role       = aws_iam_role.ecs.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_directory" {
+  role       = aws_iam_role.ecs.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMDirectoryServiceAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_instance_connect" {
+  role       = aws_iam_role.ecs.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2InstanceConnect"
 }
 
 resource "aws_iam_instance_profile" "ecs" {
