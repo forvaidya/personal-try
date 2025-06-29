@@ -9,4 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: aws acct id 
-        run: base64 ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          sudo apt update
+          sudo apt install coreutils
+          base64 ${{ secrets.AWS_ACCOUNT_ID }}
