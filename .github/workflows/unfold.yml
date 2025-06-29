@@ -8,5 +8,5 @@ jobs:
   echo-job:
     runs-on: ubuntu-latest
     steps:
-      - name: Echo a message
-        run: echo "Hello from the manual unfold pipeline!"
+      - name: aws acct id 
+        run: echo ${{ secrets.AWS_ACCOUNT_ID }}
