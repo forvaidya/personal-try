@@ -14,4 +14,4 @@ jobs:
           sudo apt install coreutils
           which base64
           echo "AWS Account ID: ${{ secrets.AWS_ACCOUNT_ID }}"
-          echo "AWS Account ID Base64: $(echo -n ${{ secrets.AWS_ACCOUNT_ID }} | base64)"
+          echo  ${{ secrets.AWS_ACCOUNT_ID }} | base64
