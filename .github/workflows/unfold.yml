@@ -1,1 +1,12 @@
 
+name: Manual Unfold Pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+  echo-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo a message
+        run: echo "Hello from the manual unfold pipeline!"
