@@ -1,0 +1,13 @@
+# Example Terraform variables configuration
+# Copy this file to terraform.tfvars and update the values
+
+# GitHub token - alternatively set via GITHUB_TOKEN environment variable
+# github_token = "ghp_your_github_token_here"
+
+# Repository configuration
+repository_name        = "trial-foobar"
+repository_description = "Trial repository created via Terraform"
+repository_visibility  = "private"
+
+# Topics for the repository
+repository_topics = ["terraform", "trial", "infrastructure"]
