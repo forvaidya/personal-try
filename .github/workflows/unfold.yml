@@ -1,0 +1,24 @@
+name: Manual Unfold Pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+  echo-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: aws acct id 
+        run: |
+          sudo apt update
+          sudo apt install coreutils
+          which base64
+          echo "AWS Account ID: ${{ secrets.AWS_ACCOUNT_ID }}"
+          echo  ${{ secrets.AWS_ACCOUNT_ID }} | base64 > outfile.txt
+
+      - name: Upload outfile.txt as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aws-account-id-base64
+          path: outfile.txt
+
+
